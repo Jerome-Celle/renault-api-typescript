@@ -191,3 +191,5 @@ dist
 
 /lib/
 /.idea/
+!/.env
+/.env
