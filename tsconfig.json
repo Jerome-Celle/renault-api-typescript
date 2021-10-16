@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2017",
+    "sourceMap": true,
+    "outDir": "lib",
+    "noUnusedLocals": true,
+    "strict": true,
+    "removeComments": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "src"
+  ]
+}
