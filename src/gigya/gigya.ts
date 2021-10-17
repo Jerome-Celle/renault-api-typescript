@@ -1,17 +1,20 @@
-import { BehaviorSubject, filter, map, Observable, switchMap, tap } from 'rxjs';
-import { IAccountJWT, IAccountLogin } from './models/account';
+import { map, Observable, switchMap, tap } from 'rxjs';
+import { IAccountJWT, IAccountLogin, IGigyaJWTPayload } from './models/account';
 import { axiosGet } from '../axios-subscriber';
+import { JwtPayload } from 'jsonwebtoken';
+import jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
 export class Gigya {
   static _instance: Gigya;
 
-  private _jwtToken: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public jwtToken: string | undefined;
+  public jwtPayload: IGigyaJWTPayload | undefined;
 
-  public jwtToken$: Observable<string> = this._jwtToken.pipe(
-    filter((token) => token !== '')
-  );
+  get personID(): string | undefined {
+    return this.jwtPayload?.personId;
+  }
 
   private apikey: string | undefined;
   private loginID: string | undefined;
@@ -31,16 +34,29 @@ export class Gigya {
     return Gigya._instance;
   }
 
-  public login(initData: { loginID: string; password: string }) {
+  public login(initData: {
+    loginID: string;
+    password: string;
+  }): Observable<IAccountJWT> {
     this.loginID = initData.loginID;
     this.password = initData.password;
-    this._accountsLogin()
-      .pipe(switchMap(() => this._accountsJWT()))
-      .subscribe({
-        next: (data: IAccountJWT) => {
-          this._jwtToken.next(data.id_token);
-        },
-      });
+    return this._accountsLogin().pipe(
+      switchMap(() => this._accountsJWT()),
+      tap((data: IAccountJWT) => {
+        if (data.id_token) {
+          this.jwtToken = data.id_token;
+          const payload: JwtPayload | string | null = jwt.decode(data.id_token);
+          if (payload && typeof payload !== 'string') {
+            this.jwtPayload = {
+              ...payload,
+              apiKey: payload.apiKey,
+              personId: payload['data.personId'],
+              gigyaDataCenter: payload['data.gigyaDataCenter'],
+            };
+          }
+        }
+      })
+    );
   }
 
   private _accountsLogin(): Observable<IAccountLogin> {
@@ -79,11 +95,6 @@ export class Gigya {
           'Content-type': 'application/json',
         },
       }
-    ).pipe(
-      tap(console.log),
-      map((response) => response.data)
-    );
+    ).pipe(map((response) => response.data));
   }
 }
-
-export const gigya = Gigya.instance();

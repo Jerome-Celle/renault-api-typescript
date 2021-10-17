@@ -1,24 +1,34 @@
 import DoneCallback = jest.DoneCallback;
-import { take } from 'rxjs';
-import { gigya } from '../src/gigya/gigya';
+import { switchMap, take } from 'rxjs';
+import { Kamereon } from '../src/kamereon/kamereon';
 
 require('dotenv').config();
 
 const loginID: string = process.env.loginID || '';
 const password: string = process.env.password || '';
 
-test('check axios get', (done: DoneCallback) => {
-  gigya.login({
-    loginID: loginID,
-    password: password,
-  });
-  gigya.jwtToken$.pipe(take(1)).subscribe({
-    next: (jwtToken: string) => {
-      expect(jwtToken.startsWith('eyJ0')).toEqual(true);
-    },
-    error: (data) => {
-      console.log(data);
-    },
-    complete: () => done(),
-  });
+test('check first renault api methods', (done: DoneCallback) => {
+  const kamereon: Kamereon = Kamereon.instance();
+
+  kamereon
+    .login({
+      loginID: loginID,
+      password: password,
+    })
+    .pipe(
+      take(1),
+      switchMap(() => kamereon.getPerson()),
+      switchMap(() => kamereon.getVehicles()),
+      switchMap(() => kamereon.getVehicle(process.env.vinTest || ''))
+    )
+    .subscribe({
+      next: (value) => {
+        console.log(value);
+        done();
+      },
+      error: (data) => {
+        console.log(data);
+        done();
+      },
+    });
 });

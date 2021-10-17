@@ -1,3 +1,5 @@
+import { JwtPayload } from 'jsonwebtoken';
+
 export interface IAccountLogin {
   socialProviders: string;
   sessionInfo: { cookieValue: string; cookieName: string };
@@ -45,4 +47,10 @@ export interface IAccountJWT {
   errorCode: number;
   time: string;
   statusCode: number;
+}
+
+export interface IGigyaJWTPayload extends JwtPayload {
+  apiKey: string;
+  personId: string;
+  gigyaDataCenter: string;
 }
