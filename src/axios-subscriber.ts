@@ -32,9 +32,14 @@ class AxiosSubscriber<
     // XHR abort pointer
     this.aborted = false;
 
+    const configWithCancel: AxiosRequestConfig<D> = {
+      cancelToken: this.source.token,
+      ...config,
+    };
+
     // make axios request on subscription
     axios
-      .get<T, R, D>(url, config)
+      .get<T, R, D>(url, configWithCancel)
       .then((response) => {
         observer.next(response);
         observer.complete();
