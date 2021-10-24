@@ -191,7 +191,6 @@ dist
 
 /lib/
 /.idea/
-!/.env
 /.env
-!/tests/perso.test.ts
 /tests/perso.test.ts
+/junit.xml

@@ -96,3 +96,5 @@ export class Gigya {
       .pipe(map((response) => response.data));
   }
 }
+
+export const gigya: Gigya = Gigya.instance();
