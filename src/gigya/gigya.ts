@@ -1,6 +1,6 @@
 import { map, Observable, switchMap, tap } from 'rxjs';
 import { IAccountJWT, IAccountLogin, IGigyaJWTPayload } from './models/account';
-import { axiosGet } from '../axios-subscriber';
+import { axiosRxjs } from '../axios-rxjs';
 import { JwtPayload } from 'jsonwebtoken';
 import jwt = require('jsonwebtoken');
 
@@ -60,9 +60,8 @@ export class Gigya {
   }
 
   private _accountsLogin(): Observable<IAccountLogin> {
-    return axiosGet<IAccountLogin>(
-      'https://accounts.eu1.gigya.com/accounts.login',
-      {
+    return axiosRxjs
+      .get<IAccountLogin>('https://accounts.eu1.gigya.com/accounts.login', {
         params: {
           apikey: this.apikey,
           loginID: this.loginID,
@@ -71,20 +70,19 @@ export class Gigya {
         headers: {
           'Content-type': 'application/json',
         },
-      }
-    ).pipe(
-      map((response) => response.data),
-      tap(
-        (account: IAccountLogin) =>
-          (this.loginToken = account.sessionInfo.cookieValue)
-      )
-    );
+      })
+      .pipe(
+        map((response) => response.data),
+        tap(
+          (account: IAccountLogin) =>
+            (this.loginToken = account.sessionInfo.cookieValue)
+        )
+      );
   }
 
   private _accountsJWT(): Observable<IAccountJWT> {
-    return axiosGet<IAccountJWT>(
-      'https://accounts.eu1.gigya.com/accounts.getJWT',
-      {
+    return axiosRxjs
+      .get<IAccountJWT>('https://accounts.eu1.gigya.com/accounts.getJWT', {
         params: {
           ApiKey: this.apikey,
           login_token: this.loginToken,
@@ -94,7 +92,7 @@ export class Gigya {
         headers: {
           'Content-type': 'application/json',
         },
-      }
-    ).pipe(map((response) => response.data));
+      })
+      .pipe(map((response) => response.data));
   }
 }

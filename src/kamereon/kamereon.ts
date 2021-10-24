@@ -1,7 +1,6 @@
-import { axiosGet } from '../axios-subscriber';
-import { Gigya } from '../gigya/gigya';
+import { axiosRxjs } from '../axios-rxjs';
+import { Gigya, IAccountJWT } from '../gigya';
 import { map, Observable, of, tap } from 'rxjs';
-import { IAccountJWT } from '../gigya/models/account';
 import { AxiosRequestHeaders } from 'axios';
 import { IPerson } from './models/person';
 import { IVehicleLocation, IVehicles } from './models/vehicle';
@@ -47,19 +46,21 @@ export class Kamereon {
         apikey: this._apiKey,
         'x-gigya-id_token': this._gigya.jwtToken,
       };
-      return axiosGet<IPerson>(url, {
-        params: {
-          country: 'FR',
-        },
-        headers,
-      }).pipe(
-        map((data) => data.data),
-        tap((person: IPerson) => {
-          this._accountID = person.accounts.find(
-            (account) => account.accountType === 'MYRENAULT'
-          )?.accountId;
+      return axiosRxjs
+        .get<IPerson>(url, {
+          params: {
+            country: 'FR',
+          },
+          headers,
         })
-      );
+        .pipe(
+          map((data) => data.data),
+          tap((person: IPerson) => {
+            this._accountID = person.accounts.find(
+              (account) => account.accountType === 'MYRENAULT'
+            )?.accountId;
+          })
+        );
     } else {
       return of(null);
     }
@@ -73,12 +74,14 @@ export class Kamereon {
         apikey: this._apiKey,
         'x-gigya-id_token': this._gigya.jwtToken,
       };
-      return axiosGet<IVehicles>(url, {
-        params: {
-          country: 'FR',
-        },
-        headers,
-      }).pipe(map((data) => data.data));
+      return axiosRxjs
+        .get<IVehicles>(url, {
+          params: {
+            country: 'FR',
+          },
+          headers,
+        })
+        .pipe(map((data) => data.data));
     } else {
       return of(null);
     }
@@ -92,12 +95,14 @@ export class Kamereon {
         apikey: this._apiKey,
         'x-gigya-id_token': this._gigya.jwtToken,
       };
-      return axiosGet<IVehicleLocation>(url, {
-        params: {
-          country: 'FR',
-        },
-        headers,
-      }).pipe(map((data) => data.data));
+      return axiosRxjs
+        .get<IVehicleLocation>(url, {
+          params: {
+            country: 'FR',
+          },
+          headers,
+        })
+        .pipe(map((data) => data.data));
     } else {
       return of(null);
     }
